@@ -1,13 +1,17 @@
 package cn.huangxulin.rabbitmq2.utils;
 
+import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * 功能描述: 初始化连接工厂
  *
  * @author hxulin
  */
-public final class ConnectionFactoryUtils {
+public final class ConnectionUtils {
 
     private static final ConnectionFactory CONNECTION_FACTORY = new ConnectionFactory();
 
@@ -23,11 +27,11 @@ public final class ConnectionFactoryUtils {
         CONNECTION_FACTORY.setVirtualHost("test");
     }
 
-    private ConnectionFactoryUtils() {
+    private ConnectionUtils() {
 
     }
 
-    public static ConnectionFactory getConnectionFactory() {
-        return CONNECTION_FACTORY;
+    public static Connection newConnection() throws IOException, TimeoutException {
+        return CONNECTION_FACTORY.newConnection();
     }
 }
