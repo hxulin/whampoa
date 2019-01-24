@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="beanPostProcessor" class="cn.huangxulin.spring._04_bean_life_cycle.BeanPostProcessorImpl" />
+
+    <bean id="source" class="cn.huangxulin.spring._04_bean_life_cycle.Source">
+        <property name="fruit" value="橙汁" />
+        <property name="sugar" value="少糖" />
+        <property name="size" value="大杯" />
+    </bean>
+
+    <bean id="juiceMaker2" class="cn.huangxulin.spring._04_bean_life_cycle.JuiceMaker2" init-method="init" destroy-method="myDestroy">
+        <property name="beverageShop" value="贡茶" />
+        <property name="source" ref="source" />
+    </bean>
+
+</beans>
