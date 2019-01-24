@@ -162,6 +162,8 @@ public class JuiceMaker2 implements BeanNameAware, BeanFactoryAware, Application
 }
 ```
 
+输出结果：
+
 ```
 【Source】对象source开始实例化
 【Source】对象source实例化完成
@@ -177,9 +179,11 @@ public class JuiceMaker2 implements BeanNameAware, BeanFactoryAware, Application
 【JuiceMaker2】执行自定义销毁方法
 ```
 
+关于 Spring Bean 生命周期的介绍，参考文章：
 
+- [Spring IoC容器](https://huangxulin.cn/2019/01/15/spring-ioc-container/)
 
-
+- [Spring Bean 生命周期](https://github.com/crossoverJie/JCSprout/blob/master/MD/spring/spring-bean-lifecycle.md)
 
 
 
