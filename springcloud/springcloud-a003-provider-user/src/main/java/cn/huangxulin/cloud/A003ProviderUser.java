@@ -13,9 +13,9 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 @SpringBootApplication
 @MapperScan("cn.huangxulin.cloud.mapper")
 @EnableEurekaClient
-public class ProviderUserApplication {
+public class A003ProviderUser {
 
     public static void main(String[] args) {
-        SpringApplication.run(ProviderUserApplication.class, args);
+        SpringApplication.run(A003ProviderUser.class, args);
     }
 }
