@@ -10,7 +10,7 @@
 
 - 使用 **import** 导入其他配置文件：
 
-  ```html
+  ```xml
   <?xml version="1.0" encoding="UTF-8"?>
   <beans xmlns="http://www.springframework.org/schema/beans"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -184,6 +184,341 @@ public class JuiceMaker2 implements BeanNameAware, BeanFactoryAware, Application
 - [Spring IoC容器](https://huangxulin.cn/2019/01/15/spring-ioc-container/)
 
 - [Spring Bean 生命周期](https://github.com/crossoverJie/JCSprout/blob/master/MD/spring/spring-bean-lifecycle.md)
+
+### 5、Bean 的四种实例化方式
+
+#### 5.1 构造器实例化（无参数构造器），最标准，使用最多
+
+```java
+public class Cat1 {
+    public Cat1() {
+        System.out.println("构建Cat1...");
+    }
+}
+```
+
+   ```xml
+<!-- Spring Bean 配置 -->
+<bean id="cat1" class="cn.huangxulin.spring._05_create_bean._01_constructor.Cat1" />
+   ```
+
+测试代码：
+
+```java
+@Autowired
+private Cat1 c1;
+
+@Test
+void test1() {
+    System.out.println(c1);
+}
+```
+
+#### 5.2 静态工厂实例化，解决系统遗留问题
+
+```java
+public class Cat2 {
+
+}
+```
+
+```java
+// 静态工厂，工厂方法属于类，使用 static 修饰
+public class Cat2Factory {
+    public static Cat2 createInstance() {
+        Cat2 c2 = new Cat2();
+        // TODO
+        return c2;
+    }
+}
+```
+
+**配置文件配置工厂类，其中 `factory-method` 指定工厂方法。**
+
+```xml
+<bean id="cat2" class="cn.huangxulin.spring._05_create_bean._02_static_factory.Cat2Factory" factory-method="createInstance" />
+```
+
+测试代码：
+
+```java
+@Autowired
+private Cat2 c2;
+
+@Test
+void test2() {
+    System.out.println(c2);
+}
+```
+
+#### 5.3 实例工厂实例化，解决系统遗留问题
+
+```java
+public class Cat3 {
+
+}
+```
+
+```java
+// 实例工厂，工厂方法属于对象，没有 static 修饰
+public class Cat3Factory {
+    public Cat3 createInstance() {
+        Cat3 c3 = new Cat3();
+        // TODO
+        return c3;
+    }
+}
+```
+**配置文件配置工厂类和实体类，实体类的 `factory-bean` 指定工厂类，`factory-method` 指定工厂方法。**
+
+```xml
+<bean id="cat3Factory" class="cn.huangxulin.spring._05_create_bean._03_instance_factory.Cat3Factory" />
+
+<bean id="cat3" factory-bean="cat3Factory" factory-method="createInstance" />
+```
+
+测试代码：
+
+```java
+@Autowired
+private Cat3 c3;
+
+@Test
+void test3() {
+    System.out.println(c3);
+}
+```
+
+#### 5.4 实现 FactoryBean 接口
+
+实现工厂变种，如集成MyBatis框架使用：`org.mybatis.spring.SqlSessionFactoryBean`
+
+```java
+public class Cat4 {
+
+}
+```
+
+```java
+/**
+ * 功能描述: 实现 FactoryBean 接口
+ *
+ * 该方法可以理解为实例工厂的变种，以接口中的 getObject 方法来规范 factory-method 的方法名
+ *
+ * @author hxulin
+ */
+public class Cat4Factory implements FactoryBean<Cat4> {
+    
+    // 相当于实例工厂的 factory-method
+    @Override
+    public Cat4 getObject() throws Exception {
+        Cat4 c4 = new Cat4();
+        // TODO
+        return c4;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return Cat4.class;
+    }
+}
+```
+
+这里配置的是工厂类，实际是工厂生成的对象，**工厂方法约定为 getObject，所以无需配置**：
+
+```xml
+<bean id="cat4" class="cn.huangxulin.spring._05_create_bean._04_factory_bean.Cat4Factory" />
+```
+
+### 6、Bean 的作用域
+
+在 Spring 容器中是指其创建的 Bean 对象相对于其他的 Bean 对象的请求可见范围。
+
+```xml
+<bean id="" class="" scope="作用域" />
+```
+
+- **singleton：**单例，在 Spring IoC 容器中仅存在一个 Bean 实例（**默认的 scope**）
+
+- **prototype：**多例，每次从容器中获取 Bean 时，都返回一个新的实例，即每次调用 getBean() 时，相当于执行 new XxxBean()，**不会在容器启动时创建对象**。
+
+- request：用于 Web 开发，将 Bean 放入 request 范围，request.setAttribute("xxx")，在同一个 request 获得同一个 Bean
+
+- session：用于 Web 开发，将 Bean 放入 session 范围，在同一个 session 中获得同一个 Bean
+
+- globalSession：一般用于 Porlet 应用环境，分布式系统存在全局 session 概念（单点登录），如果不是 porlet 环境，globalSession 等同于 session
+
+- application：Scopes a single bean definition to the lifecycle of a `ServletContext`. Only valid in the context of a web-aware Spring `ApplicationContext`.
+
+- websocket：Scopes a single bean definition to the lifecycle of a `WebSocket`. Only valid in the context of a web-aware Spring `ApplicationContext`.
+
+Spring5 开始出现 websocket，globalSession 作废。
+
+**在开发中主要使用 scope=“singleton”、scope=“prototype”**
+
+**总结：对于 Struts1 中的 Action 使用 request，Struts2 中的 Action 使用 prototype 类型，其他使用 singleton**
+
+### 7、Bean 的初始化和销毁
+
+比如 DataSource，SqlSessionFactory 最终都需要关闭资源：在 Bean 销毁之前，都要调用 close 方法。
+
+```xml
+<bean id="dataSource" class="cn.huangxulin.spring._07_lifecycle.MyDataSource"
+      init-method="该类中的初始化方法名"
+      destroy-method="该类中销毁方法名" />
+```
+
+- init-method：Bean 生命周期的初始化方法，**在构造器执行之后，立即执行**
+- destroy-method：**Spring 容器正常关闭的时候**，如果 Bean 被容器管理，会调用该方法
+
+**手动关闭 Spring 容器的几种方式：**
+
+1. 调用容器对象 `close` 方法关闭
+
+   ```java
+   @Test
+   void test() {
+       ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("cn/huangxulin/spring/_07_lifecycle/AppTest-context.xml");
+       // TODO
+       ctx.close();
+   }
+   ```
+
+2. 使用 Lombok 的 `@Cleanup` 注解
+
+   ```java
+   @Test
+   void test2() {
+       @Cleanup
+       ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("cn/huangxulin/spring/_07_lifecycle/AppTest-context.xml");
+       // TODO
+   }
+   ```
+
+3. 调用容器对象的 `registerShutdownHook` 方法关闭（**推荐使用**）
+
+   这种方式是**把 Spring 线程作为 JVM 的子线程**，JVM 关闭前，会关闭 Spring 容器
+
+   ```java
+   @Test
+   void test3() {
+       ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("cn/huangxulin/spring/_07_lifecycle/AppTest-context.xml");
+       // TODO
+       ctx.registerShutdownHook();
+   }
+   ```
+
+### 8、~~XML 自动装配~~（不推荐使用）
+
+```xml
+<bean id="" class="" autowire="byType" />
+```
+
+### 9、setter 方法注入
+
+- 常量类型注入
+- 对象类型注入
+- 集合类型注入
+  - Set 类型
+  - List 类型
+  - 数组类型
+  - Map 类型
+  - Properties 类型
+
+> 拓展：p 命名空间
+
+### 10、构造器注入
+
+#### 10.1 定位构造器的参数可以通过 index、type、name 等属性，推荐使用 name 
+
+```java
+public class Employee2 {
+
+    private String name;
+
+    private Integer age;
+
+    private BigDecimal salary;
+
+    public Employee2(String name, Integer age, BigDecimal salary) {
+        this.name = name;
+        this.age = age;
+        this.salary = salary;
+    }
+
+    // toString...
+}
+```
+
+```xml
+<bean id="employee2" class="cn.huangxulin.spring._10_di_constructor.Employee2">
+
+    <!--<constructor-arg index="0" value="Castle"/>
+        <constructor-arg index="1" value="19" />
+        <constructor-arg index="2" value="800" />-->
+
+    <!--<constructor-arg type="java.lang.String" value="Castle"/>
+        <constructor-arg type="java.lang.Integer" value="19" />
+        <constructor-arg type="java.math.BigDecimal" value="800" />-->
+
+    <constructor-arg name="name" value="Castle"/>
+    <constructor-arg name="age" value="19" />
+    <constructor-arg name="salary">
+        <null />
+    </constructor-arg>
+
+</bean>
+```
+
+#### 10.2 内部 Bean 注入：
+
+- **Java 代码中可以通过 `@Autowired` 获取 cat2 对象：**
+
+  ```java
+  <bean id="cat2" class="cn.huangxulin.spring._10_di_constructor.Cat2" />
+  
+  <bean id="person2" class="cn.huangxulin.spring._10_di_constructor.Person2">
+      <constructor-arg name="cat2" ref="cat2" />
+  </bean>
+  ```
+
+- **私有化处理，让 cat2 对象只服务于 person2 对象，不能直接通过 `@Autowired` 获取 cat2 对象：**
+
+  ```xml
+  <bean id="person2" class="cn.huangxulin.spring._10_di_constructor.Person2">
+      <constructor-arg>
+          <bean class="cn.huangxulin.spring._10_di_constructor.Cat2" />
+      </constructor-arg>
+  </bean>
+  ```
+
+### 11、Bean 元素的继承（本质：XML 配置的拷贝）
+
+多个 bean 元素共同配置的抽取，实则是 bean 配置的拷贝，和 Java 的继承不同。
+
+Java 的继承：把多个类共同的代码抽取到父类中。
+
+bean元素的继承（**inheritance**）：把多个 bean 元素共同的属性配置抽取到另一个公用的 bean 元素中。
+
+**注意配置中 abstract、parent 等属性的使用：**
+
+```xml
+<!-- 多个 bean 共同配置的抽取 -->
+<bean id="baseBean" abstract="true">
+    <property name="name" value="Castle" />
+    <property name="age" value="19" />
+</bean>
+
+<!-- 配置 SomeBean1 -->
+<bean id="someBean1" class="cn.huangxulin.spring._11_bean_tag_inheritance.SomeBean1" parent="baseBean">
+    <property name="color" value="red" />
+</bean>
+
+<!-- 配置 SomeBean2 -->
+<bean id="someBean2" class="cn.huangxulin.spring._11_bean_tag_inheritance.SomeBean2" parent="baseBean">
+    <property name="weight" value="60" />
+</bean>
+```
 
 
 

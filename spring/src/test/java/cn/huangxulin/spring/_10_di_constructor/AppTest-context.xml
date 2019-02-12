@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 构造器注入：常量类型 -->
+    <bean id="employee2" class="cn.huangxulin.spring._10_di_constructor.Employee2">
+
+        <!--<constructor-arg index="0" value="Castle"/>
+        <constructor-arg index="1" value="19" />
+        <constructor-arg index="2" value="800" />-->
+
+        <!--<constructor-arg type="java.lang.String" value="Castle"/>
+        <constructor-arg type="java.lang.Integer" value="19" />
+        <constructor-arg type="java.math.BigDecimal" value="800" />-->
+
+        <constructor-arg name="name" value="Castle"/>
+        <constructor-arg name="age" value="19" />
+        <constructor-arg name="salary">
+            <null />
+        </constructor-arg>
+
+    </bean>
+
+    <!-- 构造器注入：对象类型 -->
+    <bean id="cat2" class="cn.huangxulin.spring._10_di_constructor.Cat2" />
+    <bean id="person2" class="cn.huangxulin.spring._10_di_constructor.Person2">
+        <constructor-arg name="cat2" ref="cat2" />
+    </bean>
+
+    <!-- 构造器注入：集合类型 -->
+    <bean id="collectionBean2" class="cn.huangxulin.spring._10_di_constructor.CollectionBean2">
+        <constructor-arg name="set">
+            <set>
+                <value>set1</value>
+                <value>set2</value>
+            </set>
+        </constructor-arg>
+        <constructor-arg name="list">
+            <list>
+                <value>list1</value>
+                <value>list2</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="array">
+            <array>
+                <value>array1</value>
+                <value>array2</value>
+            </array>
+        </constructor-arg>
+        <constructor-arg name="map">
+            <map>
+                <entry key="key1" value="value1" />
+                <entry key="key2" value="value2" />
+            </map>
+        </constructor-arg>
+        <constructor-arg name="prop">
+            <value>
+                p1=v1
+                p2=v2
+                p3=v3
+            </value>
+        </constructor-arg>
+    </bean>
+
+</beans>

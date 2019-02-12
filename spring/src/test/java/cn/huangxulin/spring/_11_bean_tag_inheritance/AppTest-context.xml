@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 多个 bean 共同配置的抽取 -->
+    <bean id="baseBean" abstract="true">
+        <property name="name" value="Castle" />
+        <property name="age" value="19" />
+    </bean>
+
+    <!-- 配置 SomeBean1 -->
+    <bean id="someBean1" class="cn.huangxulin.spring._11_bean_tag_inheritance.SomeBean1" parent="baseBean">
+        <property name="color" value="red" />
+    </bean>
+
+    <!-- 配置 SomeBean2 -->
+    <bean id="someBean2" class="cn.huangxulin.spring._11_bean_tag_inheritance.SomeBean2" parent="baseBean">
+        <property name="weight" value="60" />
+    </bean>
+
+</beans>

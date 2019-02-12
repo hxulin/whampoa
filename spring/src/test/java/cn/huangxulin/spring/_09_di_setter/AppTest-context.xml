@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 注入的时候会进行类型转换，可以查阅：属性编辑器 PropertyEditor 相关资料 -->
+
+    <!-- 属性注入：常量类型 -->
+    <bean id="employee" class="cn.huangxulin.spring._09_di_setter.Employee1">
+        <property name="name" value="Castle" />
+        <property name="age" value="19"/>
+        <property name="salary" value="800" />
+    </bean>
+
+    <!-- 属性注入：对象类型 -->
+    <bean id="cat2" class="cn.huangxulin.spring._09_di_setter.Cat1" />
+    <bean id="person1" class="cn.huangxulin.spring._09_di_setter.Person1">
+        <property name="cat2" ref="cat2" />
+    </bean>
+
+    <!-- 属性注入：集合类型 -->
+    <bean id="collectionBean1" class="cn.huangxulin.spring._09_di_setter.CollectionBean1">
+        <!-- Set类型 -->
+        <property name="set">
+            <set>
+                <value>set1</value>
+                <value>set2</value>
+            </set>
+        </property>
+        <!-- List类型 -->
+        <property name="list">
+            <list>
+                <value>list1</value>
+                <value>list2</value>
+            </list>
+        </property>
+        <!-- 数组类型 -->
+        <property name="array">
+            <array>
+                <value>array1</value>
+                <value>array2</value>
+            </array>
+            <!-- 数组类型也可以使用 list 元素注入 -->
+            <!--<list>
+                <value>array1</value>
+                <value>array2</value>
+            </list>-->
+        </property>
+        <!-- Map 类型 -->
+        <property name="map">
+            <map>
+                <entry key="key1" value="value1" />
+                <entry key="key2" value="value2" />
+            </map>
+        </property>
+        <!-- Properties 类型 -->
+        <!--<property name="prop">
+            <props>
+                <prop key="p1">v1</prop>
+                <prop key="p2">v2</prop>
+            </props>
+        </property>-->
+        <property name="prop">
+            <value>
+                p1=v1
+                p2=v2
+                p3=v3
+            </value>
+        </property>
+    </bean>
+
+</beans>
