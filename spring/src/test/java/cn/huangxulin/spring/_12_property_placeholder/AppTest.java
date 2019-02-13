@@ -29,15 +29,17 @@ public class AppTest {
         Connection conn = dataSource.getConnection();
 
         @Cleanup
-        PreparedStatement ps = conn.prepareStatement("SELECT `id`, `name`, `age` FROM user");
+        PreparedStatement ps = conn.prepareStatement("SELECT `id`, `username`, `name`, `age`, `balance` FROM `user`");
 
         @Cleanup
         ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
             System.out.print(rs.getLong("id") + ", ");
+            System.out.print(rs.getString("username") + ", ");
             System.out.print(rs.getString("name") + ", ");
-            System.out.println(rs.getInt("age"));
+            System.out.print(rs.getInt("age") + ", ");
+            System.out.println(rs.getBigDecimal("balance"));
         }
     }
 

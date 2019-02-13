@@ -199,7 +199,7 @@ public class Cat1 {
 
    ```xml
 <!-- Spring Bean 配置 -->
-<bean id="cat1" class="cn.huangxulin.spring._05_create_bean._01_constructor.Cat1" />
+<bean id="cat1" class="cn.huangxulin.spring...Cat1" />
    ```
 
 测试代码：
@@ -338,9 +338,9 @@ public class Cat4Factory implements FactoryBean<Cat4> {
 <bean id="" class="" scope="作用域" />
 ```
 
-- &nbsp;**singleton：**单例，在 Spring IoC 容器中仅存在一个 Bean 实例（**默认的 scope**）
+- **singleton**：单例，在 Spring IoC 容器中仅存在一个 Bean 实例（**默认的 scope**）
 
-- &nbsp;**prototype：**多例，每次从容器中获取 Bean 时，都返回一个新的实例，即每次调用 getBean() 时，相当于执行 new XxxBean()，**不会在容器启动时创建对象**。
+- **prototype**：多例，每次从容器中获取 Bean 时，都返回一个新的实例，即每次调用 getBean() 时，相当于执行 new XxxBean()，**不会在容器启动时创建对象**。
 
 - request：用于 Web 开发，将 Bean 放入 request 范围，request.setAttribute("xxx")，在同一个 request 获得同一个 Bean
 
@@ -520,5 +520,58 @@ bean元素的继承（**inheritance**）：把多个 bean 元素共同的属性�
 </bean>
 ```
 
+### 12、属性占位符（property-placeholder）
 
+**引入context命名空间，加载 properties 配置文件**
+
+```properties
+jdbc.driverClassName=org.h2.Driver
+jdbc.url=jdbc:h2:mem:test
+jdbc.username=root
+jdbc.password=test
+jdbc.initialSize=2
+```
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 从 classpath 根路径加载 db.properties 文件 -->
+    <context:property-placeholder location="classpath:db.properties" system-properties-mode="NEVER" />
+
+    <!-- 配置一个 Druid 的连接池 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="initialSize" value="${jdbc.initialSize}" />
+    </bean>
+
+</beans>
+```
+
+> system-properties-mode="NEVER"，防止加载系统属性。如：**在 Windows 系统下，使用 ${username} 获取属性值时，有可能获取的是 Windows 系统的用户名而非 properties 文件中的数据。**
+
+### 13、`@Autowired` 和 `@Qualifier`
+
+- **配置 `@Autowired` 注解解析器（测试环境可以不配置）**
+
+  ```xml
+  <context:annotation-config />
+  ```
+
+- **配置 `@Autowired` 的 require 为 false，找不到 bean 时注入空值， `@Qualifier` 指定配置文件中 bean 的 id**
+
+  ```java
+  @Autowired(required = false)
+  @Qualifier("cat222")
+  private Cat cat;
+  ```
 
