@@ -236,7 +236,7 @@ public class Cat2Factory {
 **配置文件配置工厂类，其中 `factory-method` 指定工厂方法。**
 
 ```xml
-<bean id="cat2" class="cn.huangxulin.spring._05_create_bean._02_static_factory.Cat2Factory" factory-method="createInstance" />
+<bean id="cat2" class="cn.huangxulin...Cat2Factory" factory-method="createInstance" />
 ```
 
 测试代码：
@@ -272,7 +272,7 @@ public class Cat3Factory {
 **配置文件配置工厂类和实体类，实体类的 `factory-bean` 指定工厂类，`factory-method` 指定工厂方法。**
 
 ```xml
-<bean id="cat3Factory" class="cn.huangxulin.spring._05_create_bean._03_instance_factory.Cat3Factory" />
+<bean id="cat3Factory" class="cn.huangxulin...Cat3Factory" />
 
 <bean id="cat3" factory-bean="cat3Factory" factory-method="createInstance" />
 ```
@@ -327,7 +327,7 @@ public class Cat4Factory implements FactoryBean<Cat4> {
 这里配置的是工厂类，实际是工厂生成的对象，**工厂方法约定为 getObject，所以无需配置**：
 
 ```xml
-<bean id="cat4" class="cn.huangxulin.spring._05_create_bean._04_factory_bean.Cat4Factory" />
+<bean id="cat4" class="cn.huangxulin...Cat4Factory" />
 ```
 
 ### 6、Bean 的作用域
@@ -338,9 +338,9 @@ public class Cat4Factory implements FactoryBean<Cat4> {
 <bean id="" class="" scope="作用域" />
 ```
 
-- **singleton：**单例，在 Spring IoC 容器中仅存在一个 Bean 实例（**默认的 scope**）
+- &nbsp;**singleton：**单例，在 Spring IoC 容器中仅存在一个 Bean 实例（**默认的 scope**）
 
-- **prototype：**多例，每次从容器中获取 Bean 时，都返回一个新的实例，即每次调用 getBean() 时，相当于执行 new XxxBean()，**不会在容器启动时创建对象**。
+- &nbsp;**prototype：**多例，每次从容器中获取 Bean 时，都返回一个新的实例，即每次调用 getBean() 时，相当于执行 new XxxBean()，**不会在容器启动时创建对象**。
 
 - request：用于 Web 开发，将 Bean 放入 request 范围，request.setAttribute("xxx")，在同一个 request 获得同一个 Bean
 
@@ -378,7 +378,7 @@ Spring5 开始出现 websocket，globalSession 作废。
    ```java
    @Test
    void test() {
-       ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("cn/huangxulin/spring/_07_lifecycle/AppTest-context.xml");
+       ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(".../AppTest-context.xml");
        // TODO
        ctx.close();
    }
@@ -390,7 +390,7 @@ Spring5 开始出现 websocket，globalSession 作废。
    @Test
    void test2() {
        @Cleanup
-       ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("cn/huangxulin/spring/_07_lifecycle/AppTest-context.xml");
+       ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(".../AppTest-context.xml");
        // TODO
    }
    ```
@@ -402,7 +402,7 @@ Spring5 开始出现 websocket，globalSession 作废。
    ```java
    @Test
    void test3() {
-       ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("cn/huangxulin/spring/_07_lifecycle/AppTest-context.xml");
+       ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(".../AppTest-context.xml");
        // TODO
        ctx.registerShutdownHook();
    }
@@ -475,9 +475,9 @@ public class Employee2 {
 - **Java 代码中可以通过 `@Autowired` 获取 cat2 对象：**
 
   ```java
-  <bean id="cat2" class="cn.huangxulin.spring._10_di_constructor.Cat2" />
+  <bean id="cat2" class="cn.huangxulin...Cat2" />
   
-  <bean id="person2" class="cn.huangxulin.spring._10_di_constructor.Person2">
+  <bean id="person2" class="cn.huangxulin...Person2">
       <constructor-arg name="cat2" ref="cat2" />
   </bean>
   ```
@@ -485,9 +485,9 @@ public class Employee2 {
 - **私有化处理，让 cat2 对象只服务于 person2 对象，不能直接通过 `@Autowired` 获取 cat2 对象：**
 
   ```xml
-  <bean id="person2" class="cn.huangxulin.spring._10_di_constructor.Person2">
+  <bean id="person2" class="cn.huangxulin...Person2">
       <constructor-arg>
-          <bean class="cn.huangxulin.spring._10_di_constructor.Cat2" />
+          <bean class="cn.huangxulin...Cat2" />
       </constructor-arg>
   </bean>
   ```
@@ -510,12 +510,12 @@ bean元素的继承（**inheritance**）：把多个 bean 元素共同的属性�
 </bean>
 
 <!-- 配置 SomeBean1 -->
-<bean id="someBean1" class="cn.huangxulin.spring._11_bean_tag_inheritance.SomeBean1" parent="baseBean">
+<bean id="someBean1" class="cn.huangxulin...SomeBean1" parent="baseBean">
     <property name="color" value="red" />
 </bean>
 
 <!-- 配置 SomeBean2 -->
-<bean id="someBean2" class="cn.huangxulin.spring._11_bean_tag_inheritance.SomeBean2" parent="baseBean">
+<bean id="someBean2" class="cn.huangxulin...SomeBean2" parent="baseBean">
     <property name="weight" value="60" />
 </bean>
 ```
