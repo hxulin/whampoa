@@ -561,17 +561,64 @@ jdbc.initialSize=2
 
 ### 13、`@Autowired` 和 `@Qualifier`
 
-- **配置 `@Autowired` 注解解析器（测试环境可以不配置）**
+- **配置 `@Autowired` 注解解析器（测试环境可以不配置，JavaWeb环境一定要配置）**
 
   ```xml
+  <!-- DI 注解解析器 -->
   <context:annotation-config />
   ```
 
-- **配置 `@Autowired` 的 require 为 false，找不到 bean 时注入空值， `@Qualifier` 指定配置文件中 bean 的 id**
+- **配置 `@Autowired` 的 require 为 false，找不到 bean 时注入空值， `@Qualifier` 用于指定配置文件中 bean 的 id**
 
   ```java
-  @Autowired(required = false)
+  @Autowired(required = false)	// 找不到bean时忽略，让对象为NULL
   @Qualifier("cat222")
   private Cat cat;
   ```
+
+### 14、`@Value` 
+
+`@Autowired` 和 `@Resource` 注解用于注入对象，`@Value` 注解用于注入常量数据（简单类型数据）。
+
+> **拓展：引入多个 properties 文件。**
+>
+> ```xml
+> <context:property-placeholder location="classpath:db.properties,classpath:server.properties" />
+> ```
+>
+> 或者：
+>
+> ```xml
+> <context:property-placeholder location="classpath:db.properties" ignore-unresolvable="true" />
+> <context:property-placeholder location="classpath:server.properties" ignore-unresolvable="true" />
+> ```
+>
+> **加载多个 properties 文件，可以用逗号分隔，也可以配置多个 `property-placeholder`，多个 `property-placeholder` 需要配置 ignore-unresolvable="true"**
+
+### 15、`@Component`、`@Controller`、`@Service`、`@Repository`
+
+这几个注解功能相同，都可以将对象注册到 Spring 容器。
+
+使用时需要配置 IoC 注解解析器：
+
+```xml
+<!-- IoC 注解解析器 -->
+<context:component-scan base-package="cn.huangxulin" />
+```
+
+### 16、`@Scope` 配置 Bean 的作用域
+
+```java
+/**
+ * ConfigurableBeanFactory.SCOPE_SINGLETON = "singleton"
+ * ConfigurableBeanFactory.SCOPE_PROTOTYPE = "prototype"
+ */
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+public class SomeBean {
+    
+}
+```
+
+### 17、静态代理
 

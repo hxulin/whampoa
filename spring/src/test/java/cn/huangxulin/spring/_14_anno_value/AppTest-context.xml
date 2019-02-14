@@ -11,7 +11,10 @@
     <!-- 配置 @Autowired 注解解析器 -->
     <context:annotation-config />
 
-    <bean id="cat1" class="cn.huangxulin.spring._13_di_anno.Cat" />
-    <bean id="person" class="cn.huangxulin.spring._13_di_anno.Person" />
+    <!-- 加载 properties 文件 -->
+    <context:property-placeholder location="classpath:db.properties" ignore-unresolvable="true" />
+    <context:property-placeholder location="classpath:server.properties" ignore-unresolvable="true" />
+
+    <bean id="valueBean" class="cn.huangxulin.spring._14_anno_value.ValueBean" />
 
 </beans>

@@ -8,10 +8,10 @@
             http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <!-- 配置 @Autowired 注解解析器 -->
+    <!-- 配置 DI 注解解析器 -->
     <context:annotation-config />
 
-    <bean id="cat1" class="cn.huangxulin.spring._13_di_anno.Cat" />
-    <bean id="person" class="cn.huangxulin.spring._13_di_anno.Person" />
+    <!-- 配置 IoC 注解解析器 -->
+    <context:component-scan base-package="cn.huangxulin.spring._17_static_proxy" />
 
 </beans>

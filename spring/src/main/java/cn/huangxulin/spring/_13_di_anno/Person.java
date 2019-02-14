@@ -1,4 +1,4 @@
-package cn.huangxulin.spring._13_di_anno.di;
+package cn.huangxulin.spring._13_di_anno;
 
 import org.springframework.beans.factory.annotation.Autowired;
 

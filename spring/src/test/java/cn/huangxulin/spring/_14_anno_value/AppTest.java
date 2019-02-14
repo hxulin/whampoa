@@ -1,4 +1,4 @@
-package cn.huangxulin.spring._13_di_anno;
+package cn.huangxulin.spring._14_anno_value;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +13,11 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 public class AppTest {
 
     @Autowired
-    private Person person;
+    private ValueBean valueBean;
 
 
     @Test
     void test() {
-        System.out.println(person);
+        System.out.println(valueBean);
     }
 }
