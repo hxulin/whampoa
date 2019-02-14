@@ -298,5 +298,62 @@ public interface UserFeignClient {
 >  }
 >  ```
 
+### 6、Eureka高可用
 
+**Eureka Server 相互注册:**
+
+```yml
+spring:
+  application:
+    name: EUREKA-HA
+
+---
+server:
+  port: 8761
+spring:
+  profiles: peer1
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8762/eureka/,http://localhost:8763/eureka/
+
+---
+server:
+  port: 8762
+spring:
+  profiles: peer2
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/,http://localhost:8763/eureka/
+
+---
+server:
+  port: 8763
+spring:
+  profiles: peer3
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/,http://localhost:8762/eureka/
+```
+
+**用户微服务同时注册到多个 Eureka Server 上面：**
+
+```yml
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/,
+      			   http://localhost:8762/eureka/,
+      			   http://localhost:8763/eureka/
+```
+
+> 这里用户微服务只要注册到集群中的一个 Eureka Server 上，其他的 Eureka Server 通过心跳机制都可以获取到用户微服务的相关信息。配置多个 Eureka Server 节点为了服务稳定性。
 
