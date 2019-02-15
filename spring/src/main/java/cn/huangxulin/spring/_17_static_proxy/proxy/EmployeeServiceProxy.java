@@ -40,8 +40,8 @@ public class EmployeeServiceProxy implements IEmployeeService {
             target.update(employee);
             txManager.commit();
         } catch (Exception e) {
-            e.printStackTrace();
             txManager.rollback();
+            e.printStackTrace();
         }
     }
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 配置 DI 注解解析器 -->
+    <context:annotation-config />
+
+    <!-- 配置 IoC 注解解析器 -->
+    <context:component-scan base-package="cn.huangxulin.spring._20_cglib_method_interceptor" />
+
+    <bean id="employeeDAO" class="cn.huangxulin.spring._20_cglib_method_interceptor.dao.impl.EmployeeDAOImpl" />
+
+    <bean id="employeeService" class="cn.huangxulin.spring._20_cglib_method_interceptor.service.impl.EmployeeServiceImpl">
+        <property name="dao" ref="employeeDAO" />
+    </bean>
+
+    <bean id="logUtil" class="cn.huangxulin.spring._20_cglib_method_interceptor.log.LogUtil" />
+
+    <!-- 配置代理增强类 -->
+    <bean id="logAdvice" class="cn.huangxulin.spring._20_cglib_method_interceptor.log.LogAdvice">
+        <property name="target" ref="employeeService" />
+        <property name="logUtil" ref="logUtil" />
+    </bean>
+
+</beans>

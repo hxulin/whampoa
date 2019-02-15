@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/aop
+            http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- 配置 DI 注解解析器 -->
+    <context:annotation-config />
+
+    <!-- 配置 IoC 注解解析器 -->
+    <context:component-scan base-package="cn.huangxulin.spring._21_aop_xml" />
+
+    <bean id="employeeDAO" class="cn.huangxulin.spring._21_aop_xml.dao.impl.EmployeeDAOImpl" />
+
+    <bean id="employeeService" class="cn.huangxulin.spring._21_aop_xml.service.impl.EmployeeServiceImpl">
+        <property name="dao" ref="employeeDAO" />
+    </bean>
+
+    <!-- AOP 配置：在什么时间 + 什么时机 + 做什么 -->
+    <!-- 1、what：做什么增强 -->
+    <bean id="transactionManager" class="cn.huangxulin.spring._21_aop_xml.tx.TransactionManager" />
+    <aop:config>
+        <!-- 配置 AOP 切面 -->
+        <aop:aspect ref="transactionManager"><!-- 关联WHAT -->
+            <!-- 2、where：在哪些包中的哪些类中的哪些方法上做增强 -->
+            <aop:pointcut id="txPoint" expression="execution(* cn.huangxulin.spring._21_aop_xml.service.*Service.*(..))" />
+            <!-- 3、when：在方法执行的什么时机做增强 -->
+            <aop:before method="begin" pointcut-ref="txPoint" />
+            <aop:after-returning method="commit" pointcut-ref="txPoint" />
+            <aop:after-throwing method="rollback" pointcut-ref="txPoint" />
+        </aop:aspect>
+    </aop:config>
+
+</beans>

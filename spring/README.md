@@ -564,14 +564,14 @@ jdbc.initialSize=2
 - **配置 `@Autowired` 注解解析器（测试环境可以不配置，JavaWeb环境一定要配置）**
 
   ```xml
-  <!-- DI 注解解析器 -->
+  <!-- DI 注解解析器，使其支持 @Autowired 注解 -->
   <context:annotation-config />
   ```
 
 - **配置 `@Autowired` 的 require 为 false，找不到 bean 时注入空值， `@Qualifier` 用于指定配置文件中 bean 的 id**
 
   ```java
-  @Autowired(required = false)	// 找不到bean时忽略，让对象为NULL
+  @Autowired(required = false)	// 找不到 bean 时忽略，让对象为 NULL
   @Qualifier("cat222")
   private Cat cat;
   ```
@@ -602,7 +602,7 @@ jdbc.initialSize=2
 使用时需要配置 IoC 注解解析器：
 
 ```xml
-<!-- IoC 注解解析器 -->
+<!-- IoC 注解解析器，使 @Component、@Service 等注解生效 -->
 <context:component-scan base-package="cn.huangxulin" />
 ```
 
@@ -621,4 +621,196 @@ public class SomeBean {
 ```
 
 ### 17、静态代理
+
+### 18、JDK 动态代理
+
+```java
+public class TransactionManagerAdvice implements InvocationHandler {
+
+    private Object target;  // 真实对象，对谁做增强
+
+    private TransactionManager txManager;  // 事务管理器
+
+    public void setTarget(Object target) {
+        this.target = target;
+    }
+
+    public void setTxManager(TransactionManager txManager) {
+        this.txManager = txManager;
+    }
+
+    /**
+     * 创建一个代理对象
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getProxyObject() {
+        return (T) Proxy.newProxyInstance(
+                target.getClass().getClassLoader(),  // 类加载器，一般使用真实对象的类加载器
+                target.getClass().getInterfaces(),  // 真实对象所实现的接口 （JDK 动态代理必须要求真实对象有接口）
+                this);  // 如何做事务增强的对象
+    }
+
+    /**
+     * 如何为真实对象做增强的具体操作
+     */
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) {
+
+        // 不能直接打印代理对象，会出现栈溢出：java.lang.StackOverflowError
+        // 原因：打印对象会调用对象的 toString 方法，toString 方法被代理增强，出现无限递归
+        // System.out.println(proxy);
+
+        // System.out.println(proxy.getClass());
+        // System.out.println(method);
+        // System.out.println(java.util.Arrays.toString(args));
+
+        Object result = null;
+        txManager.begin();
+        try {
+            result = method.invoke(target, args);  // 调用真实对象的方法
+            txManager.commit();
+        } catch (Exception e) {
+            txManager.rollback();
+            e.printStackTrace();
+        }
+        return result;
+    }
+}
+```
+
+### 19、CGLIB 动态代理
+
+### 20、拦截器实现日志记录案例
+
+```java
+public class LogAdvice implements MethodInterceptor {
+
+    private Object target;  // 真实对象
+    private LogUtil logUtil;
+
+    public void setTarget(Object target) {
+        this.target = target;
+    }
+
+    public void setLogUtil(LogUtil logUtil) {
+        this.logUtil = logUtil;
+    }
+
+    // 创建代理对象
+    @SuppressWarnings("unchecked")
+    public <T> T getProxyObject() {
+        return (T) Enhancer.create(target.getClass(), this);
+    }
+
+    @Override
+    public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+        logUtil.writeLog(method.getDeclaringClass().getName(), method.getName());
+        return method.invoke(target, args);
+    }
+}
+```
+
+### 21、AOP 思想
+
+#### 21.1 AOP 重要术语
+
+- JoinPoint：连接点，被拦截到需要做增强的方法。where：去哪里做增强
+
+- **PointCut**：切入点，需要为哪些包中的那些类中的哪些方法做增强，JoinPoint 的集合。where：去哪些地方做增强
+
+- **Advice**：增强（通知），当拦截到 JoinPoint 之后，在方法执行的某一个时机，做什么样的增强操作。
+
+  方法执行的某一个时机：when
+
+  做什么样的增强操作：what
+
+  > 根据时机分为：前置增强、后置增强、异常增强、最终增强、环绕增强
+  >
+  > ```java
+  > // 前置增强
+  > try {
+  >     // 业务代码
+  >     // 后置增强
+  > } catch(Exception e) {
+  >     // 异常增强
+  > } finally {
+  >     // 最终增强
+  > }
+  > ```
+
+- **Aspect**：切面，PointCut + Advice，**去哪些地方 + 在什么时候 + 做什么增强**
+
+- Target：目标对象，被代理的目标对象。
+
+- Weaving：织入，把 Advice 加到 Target 上之后，创建出 Proxy 对象的过程。
+
+- Proxy：一个类被 AOP 织入增强后，产生的代理类。
+
+#### 21.2 PointCut 表达式
+
+AspectJ 切入点语法：
+
+```java
+execution(modifiers-pattern? ret-type-pattern declaring-type-pattern?name-pattern(param-pattern)
+            throws-pattern?)
+```
+
+翻译成中文：
+
+```
+execution(<修饰符>? <返回类型> <声明类型>? <方法名>(<参数>) <异常>?)
+```
+
+举例：
+
+```java
+public static Class java.lang.Class.forName(String className) throws ClassNotFoundException
+```
+
+**通配符**：
+
+\*：通配任何部分，只能表示一个单词
+
+..：可用于**全限定名**中和**方法参数**中，分别表示子包和0到N个参数
+
+**常见的写法**：
+
+```java
+execution(* cn.huangxulin.wms.service.*.*(..))
+// 在 cn.huangxulin.wms.service 包中，对所有以 Service 结尾的类/接口的所有方法做增强
+execution(* cn.huangxulin.wms.service.*Service.*(..))
+execution(* cn.huangxulin..service.*.*(..))
+```
+
+### 22、使用 XML 开发 AOP
+
+- 依赖的 jar：
+
+  spring-aop-版本.RELEASE.jar
+
+  com.springsource.org.aopalliance-1.0.0.jar（Spring5之后自带）
+
+  com.springsource.org.aspectj.weaver-1.6.8.RELEASE.jar
+
+  > Spring5 开始在 spring-aop库中纳入了 AOP 联盟的 API，不再需要拷贝 aopalliance-1.0.0.jar
+
+- 配置
+
+  ```xml
+  <!-- AOP 配置：在什么时间 + 什么时机 + 做什么 -->
+  <!-- 1、what：做什么增强 -->
+  <bean id="transactionManager" class="cn.huangxulin.wms.tx.TransactionManager" />
+  <aop:config>
+      <!-- 配置 AOP 切面 -->
+      <aop:aspect ref="transactionManager"><!-- 关联WHAT -->
+          <!-- 2、where：在哪些包中的哪些类中的哪些方法上做增强 -->
+          <aop:pointcut id="txPoint" expression="execution(* cn.huangxulin.wms.service.*Service.*(..))" />
+          <!-- 3、when：在方法执行的什么时机做增强 -->
+          <aop:before method="begin" pointcut-ref="txPoint" />
+          <aop:after-returning method="commit" pointcut-ref="txPoint" />
+          <aop:after-throwing method="rollback" pointcut-ref="txPoint" />
+      </aop:aspect>
+  </aop:config>
+  ```
+  > 拓展：aop:config 标签上可以设置 proxy-target-class="true"，配置使用 CGLIB 做代理（不使用 JDK 动态代理）。
 
