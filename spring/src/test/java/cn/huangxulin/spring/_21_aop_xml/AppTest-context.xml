@@ -33,7 +33,9 @@
             <!-- 3、when：在方法执行的什么时机做增强 -->
             <aop:before method="begin" pointcut-ref="txPoint" />
             <aop:after-returning method="commit" pointcut-ref="txPoint" />
-            <aop:after-throwing method="rollback" pointcut-ref="txPoint" />
+            <aop:after-throwing method="rollback" pointcut-ref="txPoint" throwing="ex" />
+            <aop:after method="close" pointcut-ref="txPoint" />
+            <!--<aop:around method="aroundMethod" pointcut-ref="txPoint" />-->
         </aop:aspect>
     </aop:config>
 

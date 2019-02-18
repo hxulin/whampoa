@@ -571,7 +571,7 @@ jdbc.initialSize=2
 - **配置 `@Autowired` 的 require 为 false，找不到 bean 时注入空值， `@Qualifier` 用于指定配置文件中 bean 的 id**
 
   ```java
-  @Autowired(required = false)	// 找不到 bean 时忽略，让对象为 NULL
+  @Autowired(required = false)	// 找不到bean时忽略，让对象为NULL
   @Qualifier("cat222")
   private Cat cat;
   ```
@@ -724,17 +724,17 @@ public class LogAdvice implements MethodInterceptor {
 
   做什么样的增强操作：what
 
-  > 根据时机分为：前置增强、后置增强、异常增强、最终增强、环绕增强
+  > 根据时机分为：前置增强、后置增强、异常增强、最终增强、环绕增强（around）
   >
   > ```java
-  > // 前置增强
+  > // 前置增强：before
   > try {
   >     // 业务代码
-  >     // 后置增强
+  >     // 后置增强：after-returning
   > } catch(Exception e) {
-  >     // 异常增强
+  >     // 异常增强：after-throwing
   > } finally {
-  >     // 最终增强
+  >     // 最终增强：after
   > }
   > ```
 
@@ -792,7 +792,7 @@ execution(* cn.huangxulin..service.*.*(..))
 
   com.springsource.org.aspectj.weaver-1.6.8.RELEASE.jar
 
-  > Spring5 开始在 spring-aop库中纳入了 AOP 联盟的 API，不再需要拷贝 aopalliance-1.0.0.jar
+  > Spring5 开始在 spring-aop 库中纳入了 AOP 联盟的 API，不再需要拷贝 aopalliance-1.0.0.jar
 
 - 配置
 
@@ -812,5 +812,188 @@ execution(* cn.huangxulin..service.*.*(..))
       </aop:aspect>
   </aop:config>
   ```
-  > 拓展：aop:config 标签上可以设置 proxy-target-class="true"，配置使用 CGLIB 做代理（不使用 JDK 动态代理）。
+  > 拓展：`aop:config` 标签上可以设置 `proxy-target-class="true"`，配置使用 CGLIB 做代理（不使用 JDK 动态代理）。
 
+### 23、AOP 增强细节
+
+#### 23.1 在增强方法中获取异常信息
+
+```xml
+<aop:after-throwing method="rollback" pointcut-ref="txPoint" throwing="ex" />
+```
+
+```java
+public void rollback(Throwable ex) {
+    System.out.println("回滚事务，异常信息：" + ex.getMessage());
+}
+```
+
+#### 23.2 获取被增强方法信息，并传递给增强方法
+
+Spring AOP 提供 **`org.aspectj.lang.JoinPoint`** 类，作为增强方法的**第一个**参数。
+
+**JoinPoint**：提供访问当前被增强方法的真实对象、代理对象、方法参数等数据。
+
+**ProceedingJoinPoint**：JoinPoint 子类，只用于环绕增强中，可以处理被增强方法。
+
+使用 JoinPoint 类：
+
+```java
+public void begin(JoinPoint jp) {
+    System.out.println("代理对象：" + jp.getThis().getClass());
+    System.out.println("目标对象：" + jp.getTarget().getClass());
+    System.out.println("被增强方法的参数：" + Arrays.toString(jp.getArgs()));
+    System.out.println("连接点方法签名：" + jp.getSignature());
+    System.out.println("当前连接点的类型：" + jp.getKind());
+    System.out.println("开启事务");
+}
+```
+
+使用 ProceedingJoinPoint 类：
+
+```java
+public Object aroundMethod(ProceedingJoinPoint pjp) {
+    Object ret = null;
+    System.out.println("开启事务");
+    try {
+        ret = pjp.proceed();  // 执行真实对象的方法
+        System.out.println("提交事务");
+    } catch (Throwable e) {
+        System.out.println("回滚事务，异常信息：" + e.getMessage());
+    } finally {
+        System.out.println("释放资源");
+    }
+    return ret;
+}
+```
+
+### 24、使用注解开发 AOP
+
+- **添加 AOP 注解解析器**
+
+  ```xml
+  <aop:aspectj-autoproxy />
+  ```
+
+  > 拓展：`aop:aspectj-autoproxy` 标签上可以设置 `proxy-target-class="true"`，配置使用 CGLIB 做代理（不使用 JDK 动态代理）。
+
+- 示例代码：
+
+  ```java
+  @Component
+  @Aspect  // 配置一个切面
+  public class TransactionManager {
+  
+      // XML：<aop:pointcut id="txPoint" expression="execution(* cn.huangxulin.wms.service.*Service.*(..))" />
+      @Pointcut("execution(* cn.huangxulin.wms.service.*Service.*(..))")
+      public void txPoint() {
+  
+      }
+  
+      // @Before("txPoint()")
+      public void begin(JoinPoint jp) {
+          System.out.println("开启事务");
+      }
+  
+      // @AfterReturning("txPoint()")
+      public void commit(JoinPoint jp) {
+          System.out.println("提交事务");
+      }
+  
+      // @AfterThrowing(value = "txPoint()", throwing = "ex")
+      public void rollback(JoinPoint jp, Throwable ex) {
+          System.out.println("回滚事务，异常信息：" + ex.getMessage());
+      }
+  
+      // @After("txPoint()")
+      public void close(JoinPoint jp) {
+          System.out.println("释放资源");
+      }
+  
+      @Around("txPoint()")
+      public Object aroundMethod(ProceedingJoinPoint pjp) {
+          Object ret = null;
+          System.out.println("开启事务");
+          try {
+              ret = pjp.proceed();  // 执行真实对象的方法
+              System.out.println("提交事务");
+  
+          } catch (Throwable e) {
+              System.out.println("回滚事务，异常信息：" + e.getMessage());
+          } finally {
+              System.out.println("释放资源");
+          }
+          return ret;
+      }
+  
+  }
+  ```
+
+  > **注意点**：注解开发 AOP 建议使用环绕增强，其他几个增强在组合使用时，有可能出现顺序问题。（比如此处可能会出现先释放资源，后提交事务）
+
+### 25、Spring JDBC 增删改查操作
+
+```xml
+<bean id="employeeDAO" class="cn.huangxulin...dao.impl.EmployeeDAOImpl">
+    <property name="dataSource" ref="dataSource" />
+</bean>
+```
+
+```java
+public class EmployeeDAOImpl implements IEmployeeDAO {
+
+    private JdbcTemplate jdbcTemplate;
+
+    public void setDataSource(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    @Override
+    public void save(Employee employee) {
+        jdbcTemplate.update("INSERT INTO employee(`id`, `username`, `name`, `age`, `balance`) VALUES (?, ?, ?, ?, ?)",employee.getId(), employee.getUsername(), employee.getName(), employee.getAge(), employee.getBalance());
+    }
+
+    @Override
+    public void update(Employee employee) {
+        jdbcTemplate.update("UPDATE employee SET `name` = ?, `balance` = ? WHERE `id` = ?", employee.getName(), employee.getBalance(), employee.getId());
+    }
+
+    @Override
+    public void delete(Long id) {
+        jdbcTemplate.update("DELETE employee WHERE `id` = ?", id);
+    }
+
+    @Override
+    public Employee get(Long id) {
+        List<Employee> list = jdbcTemplate.query("SELECT `id`, `username`, `name`, `age`, `balance` FROM employee WHERE id = ?", new Object[]{id}, (rs, i) -> {
+            Employee e = new Employee();
+            e.setId(rs.getLong("id"));
+            e.setUsername(rs.getString("username"));
+            e.setName(rs.getString("name"));
+            e.setAge(rs.getInt("age"));
+            e.setBalance(rs.getBigDecimal("balance"));
+            return e;
+        });
+        return list.size() == 1 ? list.get(0) : null;
+    }
+
+    @Override
+    public List<Employee> listAll() {
+        return jdbcTemplate.query("SELECT `id`, `username`, `name`, `age`, `balance` FROM employee", new Object[]{}, new RowMapper<Employee>() {
+            // 把每一行结果集映射成一个 Employee 对象
+            @Override
+            public Employee mapRow(ResultSet rs, int i) throws SQLException {
+                Employee e = new Employee();
+                e.setId(rs.getLong("id"));
+                e.setUsername(rs.getString("username"));
+                e.setName(rs.getString("name"));
+                e.setAge(rs.getInt("age"));
+                e.setBalance(rs.getBigDecimal("balance"));
+                return e;
+            }
+        });
+    }
+}
+```
+
+> 查询单个对象时，不建议用 `jdbcTemplate.queryForObject(...)` 方法，当查询结果为空时，这个方法会抛出异常。

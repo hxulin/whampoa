@@ -1,6 +1,6 @@
-DROP TABLE user IF EXISTS;
+DROP TABLE employee IF EXISTS;
 
-CREATE TABLE user (
+CREATE TABLE employee (
     `id` BIGINT,
     `username` VARCHAR(40),
     `name` VARCHAR(20),

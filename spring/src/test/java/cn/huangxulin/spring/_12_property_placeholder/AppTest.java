@@ -29,7 +29,7 @@ public class AppTest {
         Connection conn = dataSource.getConnection();
 
         @Cleanup
-        PreparedStatement ps = conn.prepareStatement("SELECT `id`, `username`, `name`, `age`, `balance` FROM `user`");
+        PreparedStatement ps = conn.prepareStatement("SELECT `id`, `username`, `name`, `age`, `balance` FROM `employee`");
 
         @Cleanup
         ResultSet rs = ps.executeQuery();
