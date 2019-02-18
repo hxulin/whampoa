@@ -47,6 +47,10 @@ public class MovieController {
 
 **数据库使用的是 H2，持久层框架使用的是 MyBatisPlus**
 
+**RestTemple注意点**：
+
+![RestTemple-attention-item.png](./RestTemple-attention-item.png)
+
 ### 3、springcloud-a003
 
 | springcloud-a003-parent         | Maven 父项目，抽取公共依赖 |
@@ -298,7 +302,7 @@ public interface UserFeignClient {
 >  }
 >  ```
 
-### 6、Eureka高可用
+### 6、Eureka 高可用
 
 **Eureka Server 相互注册:**
 
@@ -351,9 +355,56 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/,
-      			   http://localhost:8762/eureka/,
-      			   http://localhost:8763/eureka/
+      		   http://localhost:8762/eureka/,
+     		   http://localhost:8763/eureka/
 ```
 
 > 这里用户微服务只要注册到集群中的一个 Eureka Server 上，其他的 Eureka Server 通过心跳机制都可以获取到用户微服务的相关信息。配置多个 Eureka Server 节点为了服务稳定性。
+
+### 7、引入Hystrix
+
+**（1）消费者项目添加依赖**
+
+```html
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-hystrix</artifactId>
+    <version>1.4.6.RELEASE</version>
+</dependency>
+```
+
+**（2）在消费者项目 SpringBoot 启动类上添加注解 `@EnableCircuitBreaker`**
+
+**（3）示例代码：**
+
+```java
+@RestController
+public class MovieController {
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @GetMapping("/movie/{id}")
+    @HystrixCommand(fallbackMethod = "findByIdFallback")
+    public User findById(@PathVariable Long id) {
+        return restTemplate.getForObject("http://localhost:7900/user/" + id, User.class);
+    }
+
+    public User findByIdFallback(Long id) {
+        User user = new User();
+        user.setId(0L);
+        return user;
+    }
+}
+```
+
+> 测试运行，启动以下子项目：
+>
+> springcloud-a003-eureka-server
+>
+> springcloud-a003-provider-user
+>
+> springcloud-a007-consumer-movie
+>
+> 当停止 springcloud-a003-provider-user 项目，请求 springcloud-a007-consumer-movie 项目，就会进入 FallBack 方法，多次请求就会发现 Hystrix 断路器打开。
 

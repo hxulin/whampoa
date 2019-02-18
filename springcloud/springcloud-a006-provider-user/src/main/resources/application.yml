@@ -31,3 +31,4 @@ eureka:
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${server.port}}
     prefer-ip-address: true
+    appname: springcloud-a006-provider-user   # 不配置，和 Swagger 集成可能会有问题
