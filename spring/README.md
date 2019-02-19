@@ -950,7 +950,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 
     @Override
     public void save(Employee employee) {
-        jdbcTemplate.update("INSERT INTO employee(`id`, `username`, `name`, `age`, `balance`) VALUES (?, ?, ?, ?, ?)",employee.getId(), employee.getUsername(), employee.getName(), employee.getAge(), employee.getBalance());
+        jdbcTemplate.update("INSERT INTO employee(`id`, `username`, `name`, `age`, `balance`) VALUES (?, ?, ?, ?, ?)", employee.getId(), employee.getUsername(), employee.getName(), employee.getAge(), employee.getBalance());
     }
 
     @Override
@@ -997,3 +997,17 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 ```
 
 > 查询单个对象时，不建议用 `jdbcTemplate.queryForObject(...)` 方法，当查询结果为空时，这个方法会抛出异常。
+
+### 26、`JdbcDaoSupport`
+
+### 27、`NamedParameterJdbcTemplate`（使用 :xxx 给占位参数起名称）
+
+### 28、银行转账案例
+
+使用 SQLite 数据库（查看该数据库应该查看**编译后**文件夹中的文件）
+
+```properties
+jdbc.driverClassName=org.sqlite.JDBC
+jdbc.url=jdbc:sqlite::resource:sqlite/test.db
+```
+
