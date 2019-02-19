@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * @author hxulin
  */
 @Configuration
-public class TestConfiguratioon {
+public class TestConfiguration {
 
     @Bean
     @ConditionalOnMissingBean

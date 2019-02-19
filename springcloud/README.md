@@ -259,7 +259,7 @@ public class TestConfiguratioon {
 > })
 > ```
 >
-> （3）在配置类 `TestConfiguratioon` 上添加自定义注解 `ExcludeFromComponentScan`
+> （3）在配置类 `TestConfiguration` 上添加自定义注解 `ExcludeFromComponentScan`
 
 ### 5、Feign
 
@@ -355,13 +355,12 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/,
-      		   http://localhost:8762/eureka/,
-     		   http://localhost:8763/eureka/
+      		   http://localhost:8762/eureka/, http://localhost:8763/eureka/
 ```
 
 > 这里用户微服务只要注册到集群中的一个 Eureka Server 上，其他的 Eureka Server 通过心跳机制都可以获取到用户微服务的相关信息。配置多个 Eureka Server 节点为了服务稳定性。
 
-### 7、引入Hystrix
+### 7、Hystrix
 
 **（1）消费者项目添加依赖**
 
@@ -406,5 +405,15 @@ public class MovieController {
 >
 > springcloud-a007-consumer-movie
 >
-> 当停止 springcloud-a003-provider-user 项目，请求 springcloud-a007-consumer-movie 项目，就会进入 FallBack 方法，多次请求就会发现 Hystrix 断路器打开。
+> 当停止 springcloud-a003-provider-user 项目，请求 springcloud-a007-consumer-movie 项目，就会进入 Fallback 方法，多次请求就会发现 Hystrix 断路器打开。
+
+### 8、`@HystrixProperty`
+
+### 9、在 Feign 中使用 Hystrix
+
+>springcloud-a003-eureka-server
+>
+>springcloud-a005-provider-user
+>
+>springcloud-a009-consumer-movie
 

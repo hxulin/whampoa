@@ -14,6 +14,8 @@
 		<module>../springcloud-a006-eureka-server</module>
 		<module>../springcloud-a006-provider-user</module>
 		<module>../springcloud-a007-consumer-movie</module>
+		<module>../springcloud-a008-consumer-movie</module>
+		<module>../springcloud-a009-consumer-movie</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

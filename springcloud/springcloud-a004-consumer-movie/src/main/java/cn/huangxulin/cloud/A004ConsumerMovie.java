@@ -1,6 +1,6 @@
 package cn.huangxulin.cloud;
 
-import cn.huangxulin.config.TestConfiguratioon;
+import cn.huangxulin.config.TestConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableEurekaClient
-@RibbonClient(name = "springcloud-a003-provider-user", configuration = TestConfiguratioon.class)
+@RibbonClient(name = "springcloud-a003-provider-user", configuration = TestConfiguration.class)
 @ComponentScan(excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ANNOTATION, value = ExcludeFromComponentScan.class)
 })

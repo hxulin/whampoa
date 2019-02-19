@@ -1004,7 +1004,7 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 
 ### 28、银行转账案例
 
-使用 SQLite 数据库（查看该数据库应该查看**编译后**文件夹中的文件）
+使用 SQLite 数据库（查看该数据库应该查看**编译后**文件夹中的 test.db 文件）
 
 ```properties
 jdbc.driverClassName=org.sqlite.JDBC
