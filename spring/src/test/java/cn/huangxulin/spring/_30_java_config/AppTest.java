@@ -1,6 +1,6 @@
-package cn.huangxulin.spring._28_tx_xml;
+package cn.huangxulin.spring._30_java_config;
 
-import cn.huangxulin.spring._28_tx_xml.service.IAccountService;
+import cn.huangxulin.spring._30_java_config.service.IAccountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -10,7 +10,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
  *
  * @author hxulin
  */
-@SpringJUnitConfig
+@SpringJUnitConfig(classes = AppConfig.class)
 public class AppTest {
 
     @Autowired

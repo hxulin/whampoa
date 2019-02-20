@@ -1,6 +1,6 @@
-package cn.huangxulin.spring._28_tx_xml;
+package cn.huangxulin.spring._29_tx_anno;
 
-import cn.huangxulin.spring._28_tx_xml.service.IAccountService;
+import cn.huangxulin.spring._29_tx_anno.service.IAccountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;

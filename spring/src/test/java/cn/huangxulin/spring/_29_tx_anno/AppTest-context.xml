@@ -3,18 +3,20 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:tx="http://www.springframework.org/schema/tx"
-       xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans.xsd
             http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context.xsd
             http://www.springframework.org/schema/tx
-            http://www.springframework.org/schema/tx/spring-tx.xsd
-            http://www.springframework.org/schema/aop
-            http://www.springframework.org/schema/aop/spring-aop.xsd">
+            http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <!-- 从 classpath 根路径加载 db.properties 文件 -->
     <context:property-placeholder location="classpath:sqlite/db.properties" system-properties-mode="NEVER" />
+
+    <!-- DI 注解解析器 -->
+    <context:annotation-config />
+    <!-- IoC 注解解析器 -->
+    <context:component-scan base-package="cn.huangxulin.spring._29_tx_anno" />
 
     <!-- 配置一个 Druid 的连接池 -->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
@@ -22,30 +24,11 @@
         <property name="url" value="${jdbc.url}" />
     </bean>
 
-    <!-- 配置 DAO -->
-    <bean id="accountDAO" class="cn.huangxulin.spring._28_tx_xml.dao.impl.AccountDAOImpl">
-        <property name="dataSource" ref="dataSource" />
-    </bean>
-
-    <!-- 配置 Service -->
-    <bean id="accountService" class="cn.huangxulin.spring._28_tx_xml.service.impl.AccountServiceImpl">
-        <property name="dao" ref="accountDAO" />
-    </bean>
-
-    <!-- 1、WHAT：配置 JDBC 的事务管理器 -->
     <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource" />
     </bean>
-    <!-- 2、WHEN：配置事务管理器增强 -->
-    <tx:advice id="txAdvice" transaction-manager="txManager">
-        <tx:attributes>
-            <tx:method name="trans" />
-        </tx:attributes>
-    </tx:advice>
-    <!-- 3、WHERE：配置切面 -->
-    <aop:config>
-        <aop:pointcut id="txPointCut" expression="execution(* cn.huangxulin.spring._28_tx_xml.service.*Service.*(..))" />
-        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut" />
-    </aop:config>
+
+    <!-- TX 注解解析器 -->
+    <tx:annotation-driven transaction-manager="txManager" />
 
 </beans>

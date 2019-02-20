@@ -22,6 +22,7 @@ public class AccountServiceImpl implements IAccountService {
     @Override
     public void trans(Long outId, Long inId, int money) {
         dao.transOut(outId, money);
+        int i = 1 / 0;  // 模拟抛出异常
         dao.transIn(inId, money);
     }
 

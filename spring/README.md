@@ -1004,10 +1004,165 @@ public class EmployeeDAOImpl implements IEmployeeDAO {
 
 ### 28、银行转账案例
 
-使用 SQLite 数据库（查看该数据库应该查看**编译后**文件夹中的 test.db 文件）
+#### 28.1 使用 SQLite 数据库
 
 ```properties
 jdbc.driverClassName=org.sqlite.JDBC
 jdbc.url=jdbc:sqlite::resource:sqlite/test.db
+```
+
+> 注意：查看该数据库应该查看**编译后**文件夹中的 test.db 文件
+
+#### 28.2 Spring 对事务支持的 API
+
+- **`PlatformTransactionManager`**：平台的事务管理器，是多种事务管理器的基类，涵盖了处理事务的方法。
+
+  >Hibernate：`HibernateTransactionManager`
+  >
+  >JDBC/MyBatis：`DataSourceTransactionManager`
+
+- **`TransactionDefinition`**：封装了事务的隔离级别、超时时间、是否为只读事务、传播规则等事务属性。
+
+- **`TransactionStatus`**：封装了事务的具体运行状态。如是否新开启事务，是否已经提交事务，设置当前事务为 rollback-only 等。
+
+#### 28.3 事务的传播规则（传播行为）
+
+在一个事务方法中，调用了其他事务的方法，此时事务该如何传递，按照什么规则传播。
+
+```java
+public interface TransactionDefinition {
+    int PROPAGATION_REQUIRED = 0;
+    int PROPAGATION_SUPPORTS = 1;
+    int PROPAGATION_MANDATORY = 2;
+    int PROPAGATION_REQUIRES_NEW = 3;
+    int PROPAGATION_NOT_SUPPORTED = 4;
+    int PROPAGATION_NEVER = 5;
+    int PROPAGATION_NESTED = 6;
+    // ...
+}
+```
+
+情况一：遵从当前事务
+
+- **REQUIRED**：必须存在一个事务，如果当前存在一个事务，则使用该事务，否则，新建一个事务。最常见的选择。
+
+- **SUPPORTS**：支持当前事务，如果当前存在事务，则使用该事务，否则，以非事务形式运行。（查询操作时记录日志）
+
+- **MANDATORY**：必须要存在事务，如果当前存在事务就使用该事务，否则，抛出非法的事务状态异常：`IllegalTransactionStateException`。
+
+情况二：不遵从当前事务
+
+- **REQUIRES_NEW**：不管当前是否存在事务，都会新开启一个事务，必须是一个新的事务。使用也比较多。
+
+- **NOT_SUPPORTED**：以非事务方式执行，如果当前存在事务，把当前事务挂起（暂停）。
+
+- **NEVER**：不支持事务，如果当前存在事务，抛出异常。
+
+情况三：寄生事务（外部事务/内部事务/嵌套事务）
+
+- **NESTED**：寄生事务，如果当前存在事务，则在内部事务内执行，如果当前不存在事务，则创建一个新的事务。寄生事务可以通过数据库 savePoint（保存点）来实现。寄生事务可以回滚，但是它的回滚不影响外部事务，但是外部事务的回滚会影响寄生事务。外部事务结束寄生事务才会被提交。
+
+  > 并不是所有的事务管理器都支持寄生事务，比如：`HibernateTransactionManager` 默认就不支持，需要手动去开启；JDBC 和 MyBatis 的事务管理器 `DataSourceTransactionManager` 默认就是支持的。
+
+#### 28.4 使用 XML 配置 JDBC 事务
+
+```xml
+<!-- 1、WHAT：配置 JDBC 的事务管理器 -->
+<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <property name="dataSource" ref="dataSource" />
+</bean>
+<!-- 2、WHEN：配置事务管理器增强 -->
+<tx:advice id="txAdvice" transaction-manager="txManager">
+    <tx:attributes>
+        <tx:method name="trans" />
+    </tx:attributes>
+</tx:advice>
+<!-- 3、WHERE：配置切面 -->
+<aop:config>
+    <aop:pointcut id="txPointCut" expression="execution(* cn.huangxulin.wms.service.*Service.*(..))" />
+    <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut" />
+</aop:config>
+```
+
+### 29、使用注解配置事务管理器
+
+```xml
+<!-- 从 classpath 根路径加载 db.properties 文件 -->
+<context:property-placeholder location="classpath:sqlite/db.properties" system-properties-mode="NEVER" />
+
+<!-- DI 注解解析器 -->
+<context:annotation-config />
+<!-- IoC 注解解析器 -->
+<context:component-scan base-package="cn.huangxulin.spring._29_tx_anno" />
+
+<!-- 配置一个 Druid 的连接池 -->
+<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+    <property name="driverClassName" value="${jdbc.driverClassName}" />
+    <property name="url" value="${jdbc.url}" />
+</bean>
+
+<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <property name="dataSource" ref="dataSource" />
+</bean>
+
+<!-- TX 注解解析器 -->
+<tx:annotation-driven transaction-manager="txManager" />
+```
+
+### 30、使用 JavaConfig 开发
+
+```java
+/**
+ * 功能描述: 当前项目的配置类，好比是 applicationContext.xml
+ */
+@Configuration  // 标识当前类为一个配置类
+@Import(DataSourceConfig.class)  // 包含其他的配置类
+@ComponentScan  // IoC注解解析器
+@EnableTransactionManagement  // 事务注解解析器
+public class AppConfig {
+
+    // 配置事务管理器
+    @Bean
+    public DataSourceTransactionManager txManager(DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
+    }
+}
+```
+
+```java
+/**
+ * 功能描述: 当前项目的连接池配置类
+ */
+@Configuration
+@PropertySource("classpath:sqlite/db.properties")
+public class DataSourceConfig {
+
+    @Value("${jdbc.driverClassName}")
+    private String driverClassName;
+
+    @Value("${jdbc.url}")
+    private String url;
+
+    // 创建连接池的Bean
+    @Bean
+    public DataSource dataSource() {
+        DruidDataSource ds = new DruidDataSource();
+        ds.setDriverClassName(driverClassName);
+        ds.setUrl(url);
+        return ds;
+    }
+}
+```
+
+测试类（无 XML）：
+
+```java
+@SpringJUnitConfig(classes = AppConfig.class)
+public class AppTest {
+    @Test
+    void test() {
+        // TODO
+    }
+}
 ```
 
