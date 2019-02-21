@@ -97,6 +97,15 @@ eureka:
     prefer-ip-address: true	# 允许通过 IP 访问，默认是通过主机名访问
 ```
 
+> 拓展：配置显示 IP 地址 + 端口的形式
+>
+> ```yaml
+> eureka:
+>   instance:
+>     instance-id: ${spring.cloud.client.ip-address}:${server.port}
+>     prefer-ip-address: true
+> ```
+
 #### 获取服务地址、实例信息
 
 ```java
@@ -416,4 +425,28 @@ public class MovieController {
 >springcloud-a005-provider-user
 >
 >springcloud-a009-consumer-movie
+
+### 10、Zuul
+
+>springcloud-a003-eureka-server
+>
+>springcloud-a003-provider-user
+>
+>springcloud-a010-gateway-zuul
+
+通过访问 Zuul 的服务地址 `http://localhost:8040/springcloud-a003-provider-user/user/1`，可以发现 Zuul 会对请求信息做反向代理。
+
+服务地址配置：
+
+```yaml
+zuul:
+  routes:
+    # http://localhost:8040/springcloud-a003-provider-user/user/1
+    # http://localhost:8040/user-service/user/1
+    springcloud-a003-provider-user: /user-service/**
+```
+
+### 11、Sidecar
+
+异构微服务
 

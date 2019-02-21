@@ -1,0 +1,16 @@
+server:
+  port: 8040
+spring:
+  application:
+    name: springcloud-a010-gateway-zuul
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+zuul:
+  routes:
+    # http://localhost:8040/springcloud-a003-provider-user/user/1
+    # http://localhost:8040/user-service/user/1
+    springcloud-a003-provider-user: /user-service/**

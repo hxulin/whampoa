@@ -29,5 +29,6 @@ eureka:
     healthcheck:
       enabled: true
   instance:
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${server.port}}
+    # instance-id: ${spring.application.name}:${spring.application.instance_id:${server.port}}
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
     prefer-ip-address: true

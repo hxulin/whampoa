@@ -1,0 +1,14 @@
+server:
+  port: 8070
+spring:
+  application:
+    name: springcloud-a011-sidecar
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+sidecar:
+  port: 8000
+  health-uri: http://localhost:8000/health.json

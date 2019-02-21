@@ -16,6 +16,8 @@
 		<module>../springcloud-a007-consumer-movie</module>
 		<module>../springcloud-a008-consumer-movie</module>
 		<module>../springcloud-a009-consumer-movie</module>
+		<module>../springcloud-a010-gateway-zuul</module>
+		<module>../springcloud-a011-sidecar</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -86,11 +88,19 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Eureka -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-starter-eureka</artifactId>
-                <version>1.4.4.RELEASE</version>
+                <version>1.4.6.RELEASE</version>
             </dependency>
+            <!-- Zuul -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-zuul</artifactId>
+                <version>1.4.6.RELEASE</version>
+            </dependency>
+            <!-- MyBatisPlus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
