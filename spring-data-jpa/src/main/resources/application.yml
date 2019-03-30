@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/jpa
+    username: root
+    password: 12345678
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL55Dialect
