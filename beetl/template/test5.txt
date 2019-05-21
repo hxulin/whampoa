@@ -1,0 +1,7 @@
+template.binding("list",service.getUserList());
+<%
+    // 在模板里, 使用注释
+    for(user in list) {
+%>
+hello, ${user.name}
+<% } %>
